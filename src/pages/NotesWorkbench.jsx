@@ -8,7 +8,7 @@ import { filterNotes, uniqueNotebooks } from "../lib/notes";
 const baseFilters = [{ value: "ALL", label: "All" }, { value: "STARRED", label: "Starred" }];
 const sorts = [{ value: "EDITED", label: "Last edited" }, { value: "CREATED", label: "Created" }, { value: "A_Z", label: "Title A–Z" }];
 
-export default function NotesWorkbench({ notes, selectedNote, selectedId, saveState, initialFilter, onFilterUsed, onAdd, onSelect, onBack, onChange, onFlush, onMetadata, onStatus, onOpenLinked }) {
+export default function NotesWorkbench({ notes, selectedNote, selectedId, saveState, initialFilter, onFilterUsed, onAdd, onSelect, onBack, onChange, onFlush, onMetadata, onStatus, onOpenLinked, onNotify }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
   const [sort, setSort] = useState("EDITED");
@@ -49,7 +49,7 @@ export default function NotesWorkbench({ notes, selectedNote, selectedId, saveSt
         <div className="browser-controls"><div className="filter-scroll" role="group" aria-label="Filter notes"><span className="filter-label"><SlidersHorizontal size={14} />View</span>{filters.map((item) => <button key={item.value} type="button" className={filter === item.value ? "filter-chip is-active" : "filter-chip"} aria-pressed={filter === item.value} onClick={() => setFilter(item.value)}>{item.label}</button>)}</div><label className="sort-select"><span className="sr-only">Sort notes</span><select value={sort} onChange={(event) => setSort(event.target.value)}>{sorts.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><ChevronDown size={14} /></label></div>
         <div className="note-list">{visible.length ? visible.map((note) => <NoteListItem key={note.id} note={note} selected={note.id === selectedId} onSelect={onSelect} />) : <EmptyState kind={search ? "search" : "notes"} title={search ? "No matching notes" : "No notes here"} description={search ? "Try another phrase or clear the current filter." : "Capture a thought now; organize it when useful."} actionLabel="New note" onAction={onAdd} />}</div>
       </section>
-      <NoteEditor key={selectedNote?.id || "empty"} note={selectedNote} notes={notes} saveState={saveState} onBack={onBack} onChange={onChange} onFlush={onFlush} onMetadata={onMetadata} onStatus={onStatus} onOpenLinked={onOpenLinked} />
+      <NoteEditor key={selectedNote?.id || "empty"} note={selectedNote} notes={notes} saveState={saveState} onBack={onBack} onChange={onChange} onFlush={onFlush} onMetadata={onMetadata} onStatus={onStatus} onOpenLinked={onOpenLinked} onNotify={onNotify} />
     </div>
   );
 }

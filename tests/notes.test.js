@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { fileKind, formatFileSize, normalizePickerDocuments } from "../src/lib/driveFiles.js";
 import { checkboxStats, filterNotes, libraryInsights, noteLinks, notePayload, noteSummary, sanitizeTags, toggleCheckboxLine, wordCount } from "../src/lib/notes.js";
 
 const now = new Date("2026-09-13T12:00:00Z").getTime();
@@ -60,3 +61,19 @@ test("summary and library insights exclude trash appropriately", () => {
   ]);
 });
 
+test("Drive picker documents are normalized, validated, and deduplicated", () => {
+  assert.deepEqual(normalizePickerDocuments([
+    { id: "valid_drive_file_123", name: " Budget.xlsx ", mimeType: "Application/Vnd.Openxmlformats-Officedocument.Spreadsheetml.Sheet", sizeBytes: "12500" },
+    { id: "short", name: "Ignored" },
+    { id: "valid_drive_file_123", name: "Budget final.xlsx", mimeType: "application/vnd.google-apps.spreadsheet" },
+  ]), [{
+    driveFileId: "valid_drive_file_123",
+    fileName: "Budget final.xlsx",
+    mimeType: "application/vnd.google-apps.spreadsheet",
+    sizeBytes: null,
+  }]);
+  assert.equal(fileKind("application/pdf"), "document");
+  assert.equal(fileKind("image/webp"), "image");
+  assert.equal(formatFileSize(12_500), "12.5 KB");
+  assert.equal(formatFileSize(null), "Google file");
+});

@@ -127,6 +127,7 @@ export default function App() {
     onMetadata: updateMetadata,
     onStatus: changeStatus,
     onOpenLinked: openLinked,
+    onNotify: setToast,
   };
 
   let content;

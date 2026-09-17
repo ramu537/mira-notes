@@ -181,7 +181,7 @@
   .note-list-item__meta i { width: 0.5rem; height: 0.5rem; flex: 0 0 auto; border-radius: 50%; background: var(--notebook-color); }
   .note-list-item__meta time { margin-left: auto; }
 
-  .note-editor { display: grid; grid-template-rows: auto auto auto auto minmax(0, 1fr); min-width: 0; min-height: 0; background: var(--paper); }
+  .note-editor { display: grid; grid-template-rows: auto auto auto auto auto minmax(0, 1fr); min-width: 0; min-height: 0; background: var(--paper); }
   .note-editor--empty { display: grid; place-items: center; align-content: center; padding: 2rem; text-align: center; }
   .paper-glyph { display: grid; width: 4rem; height: 4rem; place-items: center; border-radius: 1.25rem; background: var(--accent-soft); color: var(--accent-strong); transform: rotate(-2deg); box-shadow: 0 0 0 0.45rem color-mix(in oklch, var(--accent-soft) 55%, transparent); }
   .note-editor--empty h2 { margin-top: 1.1rem; color: var(--ink-strong); font-size: 1.1rem; }
@@ -216,6 +216,38 @@
   .tag-editor input::placeholder { color: var(--ink-faint); }
   .tag-add { color: var(--accent-strong); }
   .field-error { display: block; color: var(--danger); font-size: 0.75rem; }
+
+  .drive-attachments { min-width: 0; border-bottom: 1px solid var(--line-soft); background: color-mix(in oklch, var(--surface-soft) 54%, var(--paper)); }
+  .drive-attachments__header { display: flex; min-height: 3.55rem; align-items: center; gap: 0.65rem; padding: 0.48rem clamp(1rem, 3vw, 2.6rem); }
+  .drive-attachments__toggle { display: flex; min-width: 0; align-items: center; gap: 0.55rem; padding: 0.2rem; border-radius: var(--radius-xs); background: transparent; text-align: left; }
+  .drive-attachments__toggle:hover { color: var(--accent-strong); }
+  .drive-attachments__mark { display: grid; width: 1.9rem; height: 1.9rem; flex: 0 0 auto; place-items: center; border-radius: 0.58rem; background: var(--accent-soft); color: var(--accent-strong); }
+  .drive-attachments__toggle > span:nth-child(2) { display: grid; min-width: 0; line-height: 1.2; }
+  .drive-attachments__toggle strong { color: var(--ink-strong); font-size: 0.78rem; }
+  .drive-attachments__toggle small { margin-top: 0.15rem; color: var(--ink-muted); font-size: 0.68rem; white-space: nowrap; }
+  .drive-attachments__chevron { flex: 0 0 auto; color: var(--ink-muted); transition: transform 180ms var(--ease-out); }
+  .drive-attachments.is-expanded .drive-attachments__chevron { transform: rotate(180deg); }
+  .drive-attachments__privacy { display: inline-flex; align-items: center; gap: 0.35rem; margin-left: auto; color: var(--ink-muted); font-size: 0.7rem; white-space: nowrap; }
+  .drive-attachments__header > .button { flex: 0 0 auto; }
+  .drive-attachments__body { max-height: 12rem; overflow-y: auto; padding: 0.65rem clamp(1rem, 3vw, 2.6rem) 0.8rem; border-top: 1px solid var(--line-soft); scrollbar-width: thin; }
+  .drive-file-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.5rem; }
+  .drive-file { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; min-width: 0; align-items: center; gap: 0.48rem; padding: 0.52rem; border: 1px solid var(--line-soft); border-radius: var(--radius-xs); background: color-mix(in oklch, var(--surface) 84%, transparent); box-shadow: var(--shadow-sm); }
+  .drive-file__icon { display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 0.55rem; background: var(--accent-soft); color: var(--accent-strong); }
+  .drive-file__copy { display: grid; min-width: 0; line-height: 1.25; }
+  .drive-file__copy strong { overflow: hidden; color: var(--ink-strong); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
+  .drive-file__copy small { margin-top: 0.18rem; color: var(--ink-muted); font-size: 0.68rem; }
+  .drive-file__action { display: grid; width: 1.85rem; height: 1.85rem; place-items: center; border-radius: 50%; background: transparent; color: var(--ink-muted); text-decoration: none; }
+  .drive-file__action:hover { background: var(--accent-soft); color: var(--accent-strong); }
+  .drive-file__action--remove:hover { background: var(--danger-soft); color: var(--danger); }
+  .drive-file__action:disabled { opacity: 0.55; }
+  .drive-attachments__empty, .drive-attachments__state { display: flex; min-height: 3rem; align-items: center; justify-content: center; gap: 0.55rem; padding: 0.55rem; border: 1px dashed var(--line); border-radius: var(--radius-xs); color: var(--ink-muted); font-size: 0.75rem; text-align: left; }
+  .drive-attachments__empty > svg { flex: 0 0 auto; color: var(--accent-strong); }
+  .drive-attachments__empty span { display: grid; }
+  .drive-attachments__empty strong { color: var(--ink-strong); font-size: 0.75rem; }
+  .drive-attachments__state--error { justify-content: space-between; border-color: color-mix(in oklch, var(--danger) 35%, var(--line)); background: var(--danger-soft); color: var(--danger); }
+  .drive-attachments__state button { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 0.3rem; padding: 0.35rem 0.5rem; border-radius: var(--radius-xs); background: var(--surface); color: var(--ink-strong); font-weight: 700; }
+  .drive-attachments__inline-error { margin-top: 0.5rem; color: var(--danger); font-size: 0.72rem; }
+
   .writing-area { min-height: 0; overflow: auto; scrollbar-width: thin; }
   .writing-area > textarea { width: 100%; height: 100%; min-height: 24rem; resize: none; padding: clamp(1.4rem, 4vw, 3.25rem) clamp(1.2rem, 7vw, 6rem); border: 0; outline: 0; background: transparent; color: var(--ink-strong); font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif; font-size: 1.08rem; line-height: 1.82; caret-color: var(--accent); }
   .writing-area > textarea::placeholder { color: var(--ink-faint); }
@@ -747,6 +779,8 @@
     .side-navigation a { justify-content: center; width: 3.2rem; padding-inline: 0; }
     .sidebar-note { padding: 0.55rem; }
     .notes-workbench { grid-template-columns: minmax(17rem, 20rem) minmax(0, 1fr); }
+    .drive-attachments__privacy { display: none; }
+    .drive-attachments__toggle { margin-right: auto; }
     .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
@@ -771,6 +805,8 @@
     .editor-header { padding-inline: 0.75rem; }
     .title-input { font-size: 1.55rem; }
     .editor-toolbar, .editor-meta, .organize-row { padding-inline: 0.75rem; }
+    .drive-attachments__header, .drive-attachments__body { padding-inline: 0.75rem; }
+    .drive-attachments__body { max-height: 10rem; }
     .editor-toolbar > span { min-width: 0.5rem; }
     .editor-toolbar button { font-size: 0; }
     .editor-toolbar button svg { width: 18px; height: 18px; }
