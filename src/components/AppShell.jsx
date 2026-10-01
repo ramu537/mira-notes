@@ -24,7 +24,7 @@ function Navigation({ mobile = false }) {
   );
 }
 
-export default function AppShell({ user, onSignOut, loading, creating, onAdd, children }) {
+export default function AppShell({ user, onSignOut, loading, creating, onAdd, onOpenIntelligence, children }) {
   return (
     <div className="app-frame">
       <aside className="sidebar">
@@ -68,6 +68,7 @@ export default function AppShell({ user, onSignOut, loading, creating, onAdd, ch
           <span className="topbar-context">A quiet place for useful thoughts</span>
 
           <div className="topbar-actions">
+            <button className="icon-button topbar-intelligence" type="button" onClick={onOpenIntelligence} aria-label="Open notes intelligence" title="Notes intelligence"><Sparkles size={18} /></button>
             <button className="button button--primary topbar-add" type="button" onClick={onAdd} disabled={creating}>
               <Plus size={18} />{creating ? "Creating…" : "New note"}
             </button>
@@ -100,4 +101,3 @@ export default function AppShell({ user, onSignOut, loading, creating, onAdd, ch
     </div>
   );
 }
-

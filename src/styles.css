@@ -10,6 +10,33 @@
   button:disabled { cursor: wait; }
 }
 
+@layer components {
+  .icon-button.topbar-intelligence { border: 1px solid var(--line); background: var(--surface-soft); color: var(--accent-strong); }
+  .intelligence-dialog .dialog-card { width: min(100%, 46rem); max-height: calc(100vh - 2rem); overflow: auto; padding: 0; text-align: left; }
+  .intelligence-dialog__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.35rem 1.4rem; border-bottom: 1px solid var(--line-soft); }
+  .intelligence-dialog__header h2 { display: flex; align-items: center; gap: 0.45rem; margin: 0.25rem 0 0; color: var(--ink-strong); font-size: 1.4rem; letter-spacing: -0.035em; }
+  .intelligence-dialog__header p { margin-top: 0.35rem; color: var(--ink-muted); font-size: 0.875rem; }
+  .intelligence-dialog__actions { display: flex; gap: 0.35rem; }
+  .intelligence-dialog__body { display: grid; gap: 1rem; padding: 1.25rem 1.4rem 1.4rem; }
+  .intelligence-meta { display: flex; flex-wrap: wrap; gap: 0.45rem 1rem; color: var(--ink-muted); font-size: 0.75rem; }
+  .intelligence-status { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--ink); font-weight: 700; }
+  .intelligence-status--ready { color: var(--success); } .intelligence-status--pending { color: var(--warning); }
+  .intelligence-lead { display: grid; gap: 0.55rem; padding: 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-md); background: linear-gradient(135deg, var(--accent-soft), var(--surface)); }
+  .intelligence-lead h3 { margin: 0; color: var(--ink-strong); font-size: 1.25rem; line-height: 1.25; letter-spacing: -0.025em; }
+  .intelligence-lead p { color: var(--ink); line-height: 1.65; } .intelligence-action { color: var(--accent-strong); font-size: 0.875rem; font-weight: 750; }
+  .intelligence-coverage { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.85rem 1rem; border-radius: var(--radius-sm); background: var(--surface-soft); color: var(--accent-strong); }
+  .intelligence-coverage div { display: grid; gap: 0.15rem; } .intelligence-coverage span { color: var(--ink-muted); font-size: 0.8rem; }
+  .intelligence-evidence { display: grid; gap: 0.75rem; } .intelligence-section-title { display: flex; align-items: center; gap: 0.45rem; color: var(--ink-strong); } .intelligence-section-title h3 { margin: 0; font-size: 0.95rem; }
+  .intelligence-evidence dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; margin: 0; }
+  .intelligence-evidence dl > div { min-width: 0; padding: 0.85rem; border: 1px solid var(--line-soft); border-radius: var(--radius-sm); background: var(--surface-soft); }
+  .intelligence-evidence dt { color: var(--ink-muted); font-size: 0.75rem; text-transform: capitalize; } .intelligence-evidence dd { margin: 0.2rem 0 0; overflow-wrap: anywhere; color: var(--ink-strong); font-size: 0.9rem; font-weight: 700; }
+  .intelligence-evidence dt small { float: right; color: var(--accent-strong); font-size: 0.65rem; font-weight: 750; text-transform: none; } .intelligence-evidence dl > div.is-cited { border-color: color-mix(in oklch, var(--accent) 42%, var(--line)); }
+  .intelligence-evidence > p, .intelligence-notes { color: var(--ink-muted); font-size: 0.85rem; } .intelligence-notes summary { cursor: pointer; color: var(--ink); font-weight: 700; } .intelligence-notes ul { display: grid; gap: 0.4rem; margin: 0.65rem 0 0; padding-left: 1.2rem; }
+  .intelligence-state { display: grid; justify-items: center; gap: 0.55rem; padding: 3rem 1rem; text-align: center; color: var(--ink-muted); } .intelligence-state strong { color: var(--ink-strong); }
+  .intelligence-inline-error { display: flex; align-items: center; gap: 0.35rem; color: var(--danger); font-size: 0.8rem; } .spin { animation: intelligence-spin 900ms linear infinite; } @keyframes intelligence-spin { to { transform: rotate(360deg); } }
+}
+@layer responsive { @media (max-width: 42rem) { .intelligence-dialog__body { padding-inline: 1rem; } .intelligence-evidence dl { grid-template-columns: 1fr; } } }
+
 @layer tokens {
   :root {
     --ink-strong: oklch(24% 0.03 257);

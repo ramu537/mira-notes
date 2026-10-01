@@ -103,6 +103,19 @@ export function useNotesManager(user = null) {
     };
   }, [user, load, replaceNotes]);
 
+  useEffect(() => {
+    if (!user) return undefined;
+    const sync = () => {
+      if (document.visibilityState === "visible" && timers.current.size === 0 && queues.current.size === 0) void load();
+    };
+    window.addEventListener("focus", sync);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      window.removeEventListener("focus", sync);
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, [user, load]);
+
   const updateDraft = useCallback((id, patch, onError) => {
     const current = notesRef.current.find((note) => note.id === id);
     if (!current) return;

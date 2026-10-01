@@ -3,11 +3,14 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { configureAccessTokenProvider } from "./api/client";
 import AppShell from "./components/AppShell";
+import DomainIntelligenceDialog from "./components/DomainIntelligenceDialog";
 import LoginScreen from "./components/LoginScreen";
 import { ErrorState, LoadingState } from "./components/PageState";
 import Toast from "./components/Toast";
 import { auth, googleProvider, signInWithPopup, signOut } from "./config/firebase";
 import { useNotesManager } from "./hooks/useNotesManager";
+import { noteApi } from "./api/notes";
+import { indiaDateKey } from "./lib/intelligence";
 import { displayTitle } from "./lib/notes";
 import ArchivePage from "./pages/ArchivePage";
 import LibraryPage from "./pages/LibraryPage";
@@ -64,6 +67,7 @@ export default function App() {
   const manager = useNotesManager(user);
   const [libraryFilter, setLibraryFilter] = useState("");
   const [toast, setToast] = useState(null);
+  const [intelligenceOpen, setIntelligenceOpen] = useState(false);
   const closeToast = useCallback(() => setToast(null), []);
   const showError = useCallback((error) => setToast({ tone: "error", message: error?.message || "The note could not be saved." }), []);
 
@@ -137,9 +141,10 @@ export default function App() {
 
   return (
     <>
-      <AppShell user={user} onSignOut={handleSignOut} loading={manager.loading} creating={manager.creating} onAdd={createNote}>
+      <AppShell user={user} onSignOut={handleSignOut} loading={manager.loading} creating={manager.creating} onAdd={createNote} onOpenIntelligence={() => setIntelligenceOpen(true)}>
         {content}
       </AppShell>
+      <DomainIntelligenceDialog open={intelligenceOpen} title="Notes intelligence" description="Review unfinished checklists, stale notes and organization gaps without exposing note text in the summary." date={indiaDateKey()} load={noteApi.analyze} refresh={noteApi.refreshAnalysis} onClose={() => setIntelligenceOpen(false)} />
       <Toast toast={toast} onClose={closeToast} />
     </>
   );

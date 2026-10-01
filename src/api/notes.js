@@ -1,6 +1,12 @@
 import { apiRequest } from "./client";
 
 export const noteApi = {
+  analyze(date) {
+    return apiRequest(`/notes/analysis?${new URLSearchParams({ date })}`);
+  },
+  refreshAnalysis(date) {
+    return apiRequest("/notes/analysis/refresh", { method: "POST", body: JSON.stringify({ date }) });
+  },
   list() {
     return apiRequest("/notes");
   },
@@ -20,4 +26,3 @@ export const noteApi = {
     return apiRequest(`/notes/${encodeURIComponent(id)}`, { method: "DELETE" });
   },
 };
-
