@@ -4,6 +4,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { configureAccessTokenProvider } from "./api/client";
 import AppShell from "./components/AppShell";
 import DomainIntelligenceDialog from "./components/DomainIntelligenceDialog";
+import AiNoteCaptureModal from "./components/AiNoteCaptureModal";
+import AiMemorySearchDialog from "./components/AiMemorySearchDialog";
 import LoginScreen from "./components/LoginScreen";
 import { ErrorState, LoadingState } from "./components/PageState";
 import Toast from "./components/Toast";
@@ -68,8 +70,21 @@ export default function App() {
   const [libraryFilter, setLibraryFilter] = useState("");
   const [toast, setToast] = useState(null);
   const [intelligenceOpen, setIntelligenceOpen] = useState(false);
+  const [aiCaptureOpen, setAiCaptureOpen] = useState(false);
+  const [aiSearchOpen, setAiSearchOpen] = useState(false);
   const closeToast = useCallback(() => setToast(null), []);
   const showError = useCallback((error) => setToast({ tone: "error", message: error?.message || "The note could not be saved." }), []);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setAiSearchOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   async function createNote() {
     try {
@@ -141,10 +156,32 @@ export default function App() {
 
   return (
     <>
-      <AppShell user={user} onSignOut={handleSignOut} loading={manager.loading} creating={manager.creating} onAdd={createNote} onOpenIntelligence={() => setIntelligenceOpen(true)}>
+      <AppShell
+        user={user}
+        onSignOut={handleSignOut}
+        loading={manager.loading}
+        creating={manager.creating}
+        onAdd={createNote}
+        onOpenIntelligence={() => setIntelligenceOpen(true)}
+        onOpenAiCapture={() => setAiCaptureOpen(true)}
+        onOpenAiSearch={() => setAiSearchOpen(true)}
+      >
         {content}
       </AppShell>
       <DomainIntelligenceDialog open={intelligenceOpen} title="Notes intelligence" description="Review unfinished checklists, stale notes and organization gaps without exposing note text in the summary." date={indiaDateKey()} load={noteApi.analyze} refresh={noteApi.refreshAnalysis} onClose={() => setIntelligenceOpen(false)} />
+      <AiNoteCaptureModal
+        open={aiCaptureOpen}
+        onClose={() => setAiCaptureOpen(false)}
+        onSuccess={(msg) => {
+          manager.retry();
+          setToast({ tone: "success", message: msg });
+        }}
+      />
+      <AiMemorySearchDialog
+        open={aiSearchOpen}
+        onClose={() => setAiSearchOpen(false)}
+        onSelectNote={(noteId) => openNote(noteId)}
+      />
       <Toast toast={toast} onClose={closeToast} />
     </>
   );
