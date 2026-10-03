@@ -1,3 +1,4 @@
+import CoachingWorkspace from "./CoachingWorkspace";
 import { AlertCircle, Database, RefreshCw, Sparkles, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -15,7 +16,7 @@ function localPath(path = "") {
 const labels = { READY: "AI interpretation ready", PENDING: "AI is preparing your interpretation",
   CALCULATED: "Calculated from saved records", UNAVAILABLE: "Calculated insights available · AI unavailable" };
 
-export default function DomainIntelligenceDialog({ open, title, description, date, revision, load, refresh, onClose }) {
+export default function DomainIntelligenceDialog({ open, title, description, date, revision, load, refresh, onClose, domain, userId }) {
   const revisionKey = JSON.stringify(revision ?? null);
   const dialogRef = useRef(null), returnFocusRef = useRef(null), sequence = useRef(0);
   const [data, setData] = useState(null), [loading, setLoading] = useState(false), [error, setError] = useState("");
@@ -64,6 +65,7 @@ export default function DomainIntelligenceDialog({ open, title, description, dat
           <button className="icon-button" type="button" onClick={onClose} aria-label="Close intelligence"><X size={20} /></button>
         </div>
       </header>
+      <CoachingWorkspace domain={domain} userId={userId} date={date} active={open} onNavigate={onClose}>
       <div className="intelligence-dialog__body" aria-live="polite">
         {loading && !data && <p role="status">Reading your latest records…</p>}
         {error && <div className="intelligence-state intelligence-state--error"><AlertCircle size={20} /><p>{error}</p><button type="button" className="button button--secondary" onClick={() => read()}>Retry</button></div>}
@@ -79,6 +81,7 @@ export default function DomainIntelligenceDialog({ open, title, description, dat
           <details className="intelligence-notes"><summary>Assumptions and boundaries</summary><ul>{[...(data.assumptions || []), ...(data.safetyNotices || [])].map((notice, index) => <li key={index}>{notice}</li>)}</ul></details>
         </>}
       </div>
+      </CoachingWorkspace>
     </div>
   </dialog>;
 }
