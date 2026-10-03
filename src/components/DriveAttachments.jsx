@@ -28,7 +28,7 @@ const icons = {
 
 export default function DriveAttachments({ noteId, onNotify }) {
   const [attachments, setAttachments] = useState([]);
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pickerPreparing, setPickerPreparing] = useState(true);
   const [choosing, setChoosing] = useState(false);

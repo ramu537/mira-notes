@@ -80,8 +80,7 @@
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
+  :root[data-theme="dark"] {
       --ink-strong: oklch(95% 0.01 257);
       --ink: oklch(82% 0.015 257);
       --ink-muted: oklch(68% 0.02 257);
@@ -106,8 +105,8 @@
       --shadow-sm: 0 1px 2px oklch(5% 0.02 257 / 20%), 0 12px 34px oklch(5% 0.02 257 / 17%);
       --shadow-md: 0 20px 55px oklch(5% 0.02 257 / 30%);
       --shadow-lg: 0 30px 85px oklch(5% 0.02 257 / 46%);
-    }
-  }
+      }
+
 }
 
 @layer base {

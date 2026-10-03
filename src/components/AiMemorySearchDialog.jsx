@@ -1,210 +1,69 @@
-import { useState, useEffect, useRef } from "react";
-import { Search, Sparkles, X, Loader2, Calendar, Database } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight, CalendarDays, Database, LoaderCircle, Search, X } from "lucide-react";
 import { memoryApi } from "../api/memory";
+import IntegrationDialog from "./IntegrationDialog";
 
-const DOMAINS = [
-  { id: "NOTE", label: "Notes Only" },
-  { id: "ALL", label: "All Memory" },
-  { id: "DIARY", label: "Diary" },
-  { id: "TASK", label: "Tasks" },
-  { id: "EXPENSE", label: "Expenses" },
-  { id: "FOOD", label: "Food" },
-];
-
-export default function AiMemorySearchDialog({ open, onClose, onSelectNote }) {
-  const [query, setQuery] = useState("");
-  const [selectedDomain, setSelectedDomain] = useState("NOTE");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const inputRef = useRef(null);
-  const sequence = useRef(0);
-
+const domains = [{ id: "ALL", label: "All spaces" }, { id: "EXPENSE", label: "Expenses" }, { id: "FOOD", label: "Food" }, { id: "HABIT", label: "Habits" }, { id: "TASK", label: "Tasks" }, { id: "NOTE", label: "Notes" }, { id: "DIARY", label: "Diary" }, { id: "INVESTMENT", label: "Investments" }];
+const currentDomain = "NOTE";
+function sourceId(result) {
+  const value = String(result.sourceId ?? result.entityId ?? "");
+  return /^[1-9]\d*$/.test(value) ? value : null;
+}
+function sourceDate(result) {
+  const value = String(result.entityDate || result.metadata?.entryDate || result.metadata?.spentOn || result.metadata?.loggedOn || result.metadata?.dueOn || result.metadata?.valuedOn || result.occurredAt?.slice(0, 10) || "");
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+}
+export default function AiMemorySearchDialog({ open, onClose, onSelectDate, onSelectNote }) {
+  const [query, setQuery] = useState(""), [selectedDomain, setSelectedDomain] = useState(currentDomain);
+  const [results, setResults] = useState([]), [loading, setLoading] = useState(false), [error, setError] = useState(""), [refresh, setRefresh] = useState(0);
+  const sequence = useRef(0), input = useRef(null);
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
-      setQuery("");
-      setResults([]);
-      setError("");
-    }
+    if (!open) { setQuery(""); setResults([]); setError(""); return; }
+    const frame = window.requestAnimationFrame(() => input.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
   }, [open]);
-
   useEffect(() => {
-    const request = ++sequence.current;
-    if (!open || !query.trim()) {
-      setLoading(false);
-      setResults([]);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      setError("");
+    const version = ++sequence.current;
+    setResults([]); setError("");
+    if (!open || !query.trim()) { setLoading(false); return; }
+    setLoading(true);
+    const timer = window.setTimeout(async () => {
       try {
-        const domains = selectedDomain === "ALL" ? undefined : [selectedDomain];
-        const res = await memoryApi.search({ query: query.trim(), domains, limit: 10 });
-        if (sequence.current === request) setResults(Array.isArray(res) ? res : res?.results || []);
-      } catch (err) {
-        if (sequence.current === request) setError(err?.message || "Search failed.");
-      } finally {
-        if (sequence.current === request) setLoading(false);
-      }
+        const result = await memoryApi.search({ query: query.trim(), domains: selectedDomain === "ALL" ? undefined : [selectedDomain], limit: 10 });
+        if (version === sequence.current) setResults(Array.isArray(result) ? result : result?.results || []);
+      } catch (reason) { if (version === sequence.current) setError(reason.message || "Could not search your memory."); }
+      finally { if (version === sequence.current) setLoading(false); }
     }, 300);
-    return () => { clearTimeout(timer); sequence.current++; };
-  }, [open, query, selectedDomain]);
-
-  if (!open) return null;
-
-  return (
-    <div className="dialog-overlay" onClick={onClose} role="presentation">
-      <div
-        className="dialog-card"
-        style={{ maxWidth: "42rem", width: "100%", maxHeight: "85vh", display: "flex", flexDirection: "column" }}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="ai-notes-search-title"
-      >
-        <header className="dialog-header" style={{ paddingBottom: "0.75rem", borderBottom: "1px solid var(--border-subtle, #e2e8f0)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ color: "var(--accent-strong, #3b82f6)", display: "flex", alignItems: "center" }}>
-              <Sparkles size={20} />
-            </span>
-            <h2 id="ai-notes-search-title" style={{ fontSize: "1.125rem", fontWeight: 700 }}>
-              Personal memory search
-            </h2>
-          </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close dialog">
-            <X size={20} />
-          </button>
-        </header>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1rem 0" }}>
-          <div style={{ position: "relative" }}>
-            <Search size={18} style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary, #94a3b8)" }} />
-            <input
-              ref={inputRef}
-              type="text"
-              className="text-input"
-              style={{ width: "100%", paddingLeft: "2.75rem", fontSize: "1rem", borderRadius: "0.75rem" }}
-              placeholder="Search concepts, ideas, past notes, or questions..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {loading && (
-              <Loader2 size={18} className="spinning" style={{ position: "absolute", right: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--accent-strong, #3b82f6)" }} />
-            )}
-          </div>
-
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{ fontSize: "0.75rem", color: "var(--text-tertiary, #94a3b8)", fontWeight: 600 }}>Filter:</span>
-            {DOMAINS.map((dom) => (
-              <button
-                key={dom.id}
-                type="button"
-                className={`button ${selectedDomain === dom.id ? "button--primary" : "button--ghost"}`}
-                style={{ padding: "0.25rem 0.625rem", fontSize: "0.75rem", borderRadius: "1rem", height: "auto" }}
-                onClick={() => setSelectedDomain(dom.id)}
-              >
-                {dom.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: "0.75rem", paddingRight: "0.25rem" }}>
-          {error && (
-            <div style={{ color: "var(--danger, #ef4444)", fontSize: "0.875rem", background: "var(--danger-soft, #fee2e2)", padding: "0.625rem", borderRadius: "0.5rem" }}>
-              {error}
-            </div>
-          )}
-
-          {!query.trim() && (
-            <div style={{ textAlign: "center", padding: "2.5rem 1rem", color: "var(--text-tertiary, #94a3b8)" }}>
-              <Database size={32} style={{ margin: "0 auto 0.75rem", opacity: 0.5 }} />
-              <p style={{ fontWeight: 600, color: "var(--text-secondary, #475569)", marginBottom: "0.25rem" }}>Personal memory search</p>
-              <p style={{ fontSize: "0.8125rem", maxWidth: "26rem", margin: "0 auto" }}>
-                Search through your thoughts, research, and across all Mira spaces using Gemini 1536-dimensional semantic vector embeddings.
-              </p>
-            </div>
-          )}
-
-          {query.trim() && !loading && results.length === 0 && !error && (
-            <div style={{ textAlign: "center", padding: "2.5rem 1rem", color: "var(--text-secondary, #475569)" }}>
-              <p>No matching memory entries found for "{query}".</p>
-            </div>
-          )}
-
-          {results.map((res, index) => {
-            const dateStr = res.occurredAt?.slice(0, 10) || res.entityDate || res.createdAt?.slice(0, 10);
-            return (
-              <div
-                key={res.id || `${res.sourceType}-${res.sourceId}`}
-                style={{
-                  background: "var(--surface-2, #f8fafc)",
-                  border: "1px solid var(--border-subtle, #e2e8f0)",
-                  borderRadius: "0.75rem",
-                  padding: "0.875rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.5rem",
-                  cursor: res.sourceType === "NOTE" && onSelectNote ? "pointer" : "default",
-                }}
-                role={res.sourceType === "NOTE" && onSelectNote ? "button" : undefined}
-                tabIndex={res.sourceType === "NOTE" && onSelectNote ? 0 : undefined}
-                onKeyDown={event => {
-                  if (res.sourceType === "NOTE" && onSelectNote && (event.key === "Enter" || event.key === " ")) {
-                    event.preventDefault(); onSelectNote(Number(res.sourceId)); onClose();
-                  }
-                }}
-                onClick={() => {
-                  if (res.sourceType === "NOTE" && onSelectNote) {
-                    onSelectNote(Number(res.sourceId));
-                    onClose();
-                  }
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <span
-                      style={{
-                        fontSize: "0.6875rem",
-                        fontWeight: 700,
-                        padding: "0.15rem 0.5rem",
-                        borderRadius: "0.25rem",
-                        background: res.sourceType === "NOTE" ? "var(--accent-soft, #eff6ff)" : "var(--border-subtle, #e2e8f0)",
-                        color: res.sourceType === "NOTE" ? "var(--accent-strong, #3b82f6)" : "var(--text-primary, #0f172a)",
-                      }}
-                    >
-                      {res.sourceType}
-                    </span>
-                    {dateStr && (
-                      <span style={{ fontSize: "0.75rem", color: "var(--text-tertiary, #94a3b8)", display: "flex", alignItems: "center", gap: 3 }}>
-                        <Calendar size={12} /> {dateStr}
-                      </span>
-                    )}
-                  </div>
-                  {res.score != null && (
-                    <span style={{ fontSize: "0.6875rem", color: "var(--text-tertiary, #94a3b8)", fontWeight: 600 }}>
-                      Relevance rank: {index + 1}
-                    </span>
-                  )}
-                </div>
-
-                <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--text-primary, #0f172a)", lineHeight: 1.45, whiteSpace: "pre-wrap" }}>
-                  {res.content || res.textSnippet || res.excerpt}
-                </p>
-
-                {res.sourceType === "NOTE" && onSelectNote && (
-                  <div style={{ fontSize: "0.75rem", color: "var(--accent-strong, #3b82f6)", fontWeight: 600 }}>
-                    Open note in editor →
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+    return () => { window.clearTimeout(timer); sequence.current++; };
+  }, [open, query, selectedDomain, refresh]);
+  function actionFor(result) {
+    if (result.sourceType !== currentDomain) return null;
+    const date = sourceDate(result), id = sourceId(result);
+    if (currentDomain === "NOTE" && id && onSelectNote) return { label: "Open note", run: () => onSelectNote(Number(id)) };
+    if (["EXPENSE", "FOOD", "DIARY"].includes(currentDomain) && date && onSelectDate) return { label: "Open recorded day", run: () => onSelectDate(date) };
+    if (currentDomain === "TASK" && id) return { label: "Open task", path: "/?task=" + id };
+    if (currentDomain === "INVESTMENT" && id) return { label: "Open holding", path: "/holdings?holding=" + id };
+    if (currentDomain === "HABIT" && id) return { label: "View habit history", path: "/history" };
+    return null;
+  }
+  return <IntegrationDialog open={open} title="Search your memory" description="Find what you saved, using your own words." icon={Search} onClose={onClose} wide>
+    <div className="memory-search-controls"><label className="memory-search-input"><Search size={18} /><span className="sr-only">Search saved records</span><input ref={input} type="search" maxLength={1000} placeholder="A meal, a purchase, an idea, a moment…" value={query} onChange={event => setQuery(event.target.value)} />{query && <button className="coach-icon" type="button" onClick={() => { setQuery(""); input.current?.focus(); }} aria-label="Clear search"><X size={16} /></button>}</label>
+      <div className="memory-filters" role="group" aria-label="Search space">{domains.map(item => <button type="button" key={item.id} aria-pressed={selectedDomain === item.id} onClick={() => setSelectedDomain(item.id)}>{item.label}</button>)}</div>
     </div>
-  );
+    <div className="memory-results" aria-busy={loading}>
+      {error && <div className="integration-error" role="alert"><p>{error}</p><button type="button" className="button button--secondary" onClick={() => setRefresh(value => value + 1)}>Try again</button></div>}
+      {loading && <div className="memory-state" role="status"><LoaderCircle className="spin" size={24} /><strong>Searching your saved records…</strong></div>}
+      {!query.trim() && <div className="memory-state"><Database size={29} /><h3>A little context goes a long way</h3><p>Try “dinner with friends”, “my workout routine”, or a topic from your notes.</p><small>Semantic search when configured, with keyword search as a fallback.</small></div>}
+      {!!query.trim() && !loading && !error && !results.length && <div className="memory-state"><Search size={27} /><h3>No matching records</h3><p>Try another phrase or search across all spaces.</p></div>}
+      {results.map((result, index) => {
+        const action = actionFor(result), date = sourceDate(result);
+        return <article className="memory-result" key={result.id || result.sourceType + ":" + result.sourceId + ":" + index}><header><span className="memory-result__domain">{domains.find(item => item.id === result.sourceType)?.label || result.sourceType}</span>{date && <time dateTime={date}><CalendarDays size={12} />{date}</time>}<small>Match {index + 1}</small></header>
+          {result.title && <h3>{result.title}</h3>}<p>{result.content || result.textSnippet || result.excerpt || "No text preview available."}</p>
+          {action?.path ? <Link to={action.path} onClick={onClose}>{action.label}<ArrowUpRight size={14} /></Link> : action?.run ? <button type="button" onClick={() => { action.run(); onClose(); }}>{action.label}<ArrowUpRight size={14} /></button> : result.sourceType !== currentDomain ? <small>Saved in another Mira space</small> : null}
+        </article>;
+      })}
+    </div>
+    <footer className="memory-footer" role="status">{query.trim() && !loading && !error ? results.length + " matching records · best matches first" : "Only your saved, searchable records"}</footer>
+  </IntegrationDialog>;
 }

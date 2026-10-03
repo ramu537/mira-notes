@@ -1,3 +1,4 @@
+import FloatingAssistant from "./components/FloatingAssistant";
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -188,6 +189,7 @@ export default function App() {
         onClose={() => setAiSearchOpen(false)}
         onSelectNote={(noteId) => openNote(noteId)}
       />
+      <FloatingAssistant domain={"notes"} userId={user.uid} date={indiaDateKey()} />
       <Toast toast={toast} onClose={closeToast} />
     </>
   );
