@@ -35,7 +35,9 @@ export async function apiRequest(path, options = {}) {
 
   const body = await readBody(response);
   if (!response.ok) {
-    throw new Error(body?.detail || body?.message || "The request could not be completed. Please try again.");
+    const error = new Error(body?.detail || body?.message || "The request could not be completed. Please try again.");
+    error.status = response.status;
+    throw error;
   }
   return body;
 }

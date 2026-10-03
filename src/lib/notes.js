@@ -10,6 +10,8 @@ export function notebookToken(name) {
 
 export function notePayload(note) {
   return {
+    aiContentAllowed: Boolean(note.aiContentAllowed),
+    expectedUpdatedAt: note.updatedAt || null,
     title: String(note.title || "").slice(0, 140),
     content: String(note.content || "").slice(0, 100_000),
     notebook: String(note.notebook || "Personal").trim().slice(0, 40),

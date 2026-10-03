@@ -24,6 +24,8 @@ test("notePayload keeps only backend fields", () => {
     status: "ACTIVE",
     pinned: true,
     starred: false,
+    aiContentAllowed: false,
+    expectedUpdatedAt: notes[0].updatedAt,
   });
 });
 

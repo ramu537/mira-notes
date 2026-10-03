@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { configureAccessTokenProvider } from "./api/client";
 import AppShell from "./components/AppShell";
@@ -28,6 +28,7 @@ function loginMessage(error) {
 
 export default function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authError, setAuthError] = useState("");
@@ -123,6 +124,11 @@ export default function App() {
     else setToast({ tone: "error", message: `No active note named “${title}”.` });
   }
 
+  useEffect(() => {
+    const id = new URLSearchParams(location.search).get("note");
+    if (id && manager.ready) manager.selectNote(Number(id));
+  }, [location.search, manager.ready, manager.selectNote]);
+
   if (authLoading) {
     return <LoadingState />;
   }
@@ -168,7 +174,7 @@ export default function App() {
       >
         {content}
       </AppShell>
-      <DomainIntelligenceDialog open={intelligenceOpen} title="Notes intelligence" description="Review unfinished checklists, stale notes and organization gaps without exposing note text in the summary." date={indiaDateKey()} load={noteApi.analyze} refresh={noteApi.refreshAnalysis} onClose={() => setIntelligenceOpen(false)} />
+      <DomainIntelligenceDialog revision={manager.notes} open={intelligenceOpen} title="Notes intelligence" description="Review unfinished checklists, stale notes and organization gaps without exposing note text in the summary." date={indiaDateKey()} load={noteApi.analyze} refresh={noteApi.refreshAnalysis} onClose={() => setIntelligenceOpen(false)} />
       <AiNoteCaptureModal
         open={aiCaptureOpen}
         onClose={() => setAiCaptureOpen(false)}

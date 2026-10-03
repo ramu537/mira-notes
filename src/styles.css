@@ -866,3 +866,12 @@
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 }
+
+/* Evidence-first assistant view */
+.intelligence-findings { display: grid; gap: 1rem; }
+.intelligence-findings article { padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface-soft); }
+.intelligence-findings h4 { margin: 0 0 .5rem; }
+.intelligence-findings p { line-height: 1.6; }
+.ai-privacy-control { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; padding: .75rem; color: var(--ink-muted); }
+.ai-privacy-control input { width: auto; }
+.ai-privacy-control small { flex-basis: 100%; }
