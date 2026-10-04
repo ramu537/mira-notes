@@ -7,7 +7,7 @@ function localPath(path = "") {
   const [base, query] = path.split("?");
   let route = base;
   if (base.startsWith("/tasks")) route = "/";
-  if (base.startsWith("/notes")) route = "/";
+  if (base.startsWith("/notes")) route = base.includes("/library") ? "/library" : base.includes("/archive") ? "/archive" : "/";
   if (base.startsWith("/invest")) route = "/holdings";
   if (base.startsWith("/diary")) route = base.includes("timeline") ? "/timeline" : "/entry";
   return route + (query ? `?${query}` : "");
@@ -15,31 +15,32 @@ function localPath(path = "") {
 const labels = { READY: "AI interpretation ready", PENDING: "AI is preparing your interpretation",
   CALCULATED: "Calculated from saved records", UNAVAILABLE: "Calculated insights available · AI unavailable" };
 
-export default function DomainIntelligenceDialog({ open, title, description, date, revision, load, refresh, onClose, domain }) {
+export default function DomainIntelligenceDialog({ open, title, description, date, revision, load, refresh, onClose, domain, userId }) {
   const revisionKey = JSON.stringify(revision ?? null);
   const dialogRef = useRef(null), returnFocusRef = useRef(null), sequence = useRef(0);
-  const [data, setData] = useState(null), [loading, setLoading] = useState(false), [error, setError] = useState("");
+  const context = `${userId || ""}:${domain}:${date || ""}`;
+  const [snapshot, setSnapshot] = useState(null), [loading, setLoading] = useState(false), [error, setError] = useState("");
+  // Never show another account/date's cached interpretation, even before effects run.
+  const data = snapshot?.context === context ? snapshot.value : null;
   const read = useCallback(async (regenerate = false, quiet = false) => {
     const request = ++sequence.current;
     if (!quiet) setLoading(true);
     setError("");
     try {
       const next = await (regenerate ? refresh(date) : load(date));
-      if (sequence.current === request) setData(next);
+      if (sequence.current === request) setSnapshot({ context, value: next });
     } catch (reason) {
       if (sequence.current === request) {
-        setData(null);
         setError(reason?.message || "Could not read your latest records.");
       }
     } finally { if (sequence.current === request) setLoading(false); }
-  }, [date, load, refresh]);
+  }, [date, load, refresh, context]);
   useEffect(() => {
     const dialog = dialogRef.current;
     if (open && !dialog.open) { returnFocusRef.current = document.activeElement; dialog.showModal(); }
     if (!open && dialog.open) { dialog.close(); returnFocusRef.current?.focus?.(); }
   }, [open]);
   useEffect(() => {
-    setData(null);
     if (open) void read(true);
     return () => { sequence.current++; };
   }, [open, read, revisionKey]);
@@ -66,7 +67,8 @@ export default function DomainIntelligenceDialog({ open, title, description, dat
       </header>
 
       <div className="intelligence-dialog__body" aria-live="polite">
-        {loading && !data && <p role="status">Reading your latest records…</p>}
+        {loading && <p role="status">{data ? "Refreshing · your previous analysis stays visible." : "Reading your latest records…"}</p>}
+        {error && data && <p className="inline-notice" role="status">Showing the last successful analysis. It may not include your latest changes.</p>}
         {error && <div className="intelligence-state intelligence-state--error"><AlertCircle size={20} /><p>{error}</p><button type="button" className="button button--secondary" onClick={() => read()}>Retry</button></div>}
         {data && <>
           <div className="intelligence-meta"><span>{labels[data.status] || labels.CALCULATED}</span><span>{data.engine}</span><span>{freshnessLabel(data.assistantGeneratedAt || data.generatedAt)}</span></div>

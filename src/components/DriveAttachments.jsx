@@ -68,6 +68,7 @@ export default function DriveAttachments({ noteId, onNotify }) {
   }, []);
 
   async function addFromDrive() {
+    setExpanded(true);
     setChoosing(true);
     setError("");
     try {

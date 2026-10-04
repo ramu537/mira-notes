@@ -71,6 +71,8 @@ export default function App() {
   const manager = useNotesManager(user);
   const [libraryFilter, setLibraryFilter] = useState("");
   const [toast, setToast] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+  useEffect(() => { setDeleteError(null); }, [user?.uid]);
   const [intelligenceOpen, setIntelligenceOpen] = useState(false);
   const [aiCaptureOpen, setAiCaptureOpen] = useState(false);
   const [aiSearchOpen, setAiSearchOpen] = useState(false);
@@ -110,11 +112,16 @@ export default function App() {
   }
 
   async function deletePermanently(id) {
+    setDeleteError(null);
     try {
       await manager.actions.deletePermanently(id);
       setToast({ tone: "success", message: "Note permanently deleted." });
       return true;
-    } catch (error) { showError(error); return false; }
+    } catch (error) {
+      setDeleteError({ id, message: error.message || "Could not delete. Your record is kept." });
+      showError(error);
+      return false;
+    }
   }
 
   function explore(filter) { setLibraryFilter(filter); navigate("/"); }
@@ -159,7 +166,7 @@ export default function App() {
   let content;
   if (!manager.ready && manager.loading) content = <LoadingState />;
   else if (!manager.ready && manager.loadError) content = <ErrorState message={manager.loadError} onRetry={manager.retry} />;
-  else content = <Routes><Route path="/" element={<NotesWorkbench {...workbenchProps} />} /><Route path="/library" element={<LibraryPage notes={manager.notes} onExplore={explore} onOpen={openNote} />} /><Route path="/archive" element={<ArchivePage notes={manager.notes} saveStates={manager.saveStates} deletingId={manager.deletingId} onStatus={changeStatus} onDelete={deletePermanently} />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes>;
+  else content = <Routes><Route path="/" element={<NotesWorkbench {...workbenchProps} />} /><Route path="/library" element={<LibraryPage notes={manager.notes} onExplore={explore} onOpen={openNote} />} /><Route path="/archive" element={<ArchivePage notes={manager.notes} saveStates={manager.saveStates} deletingId={manager.deletingId} deleteError={deleteError} onStatus={changeStatus} onDelete={deletePermanently} />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes>;
 
   return (
     <>
