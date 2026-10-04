@@ -73,7 +73,7 @@ export default function AppShell({ user, onSignOut, loading, creating, onAdd, on
             <button className="icon-button" type="button" onClick={onOpenAiSearch} aria-label="Search memory" title="AI Vector Memory Search (Ctrl+K)"><Search size={18} /></button>
             <button className="icon-button topbar-intelligence" type="button" onClick={onOpenIntelligence} aria-label="Open notes intelligence" title="Notes intelligence"><Sparkles size={18} /></button>
             <button className="button button--ghost topbar-capture" type="button" onClick={onOpenAiCapture} aria-label="AI Note Capture" title="Capture thoughts with AI">
-              <Sparkles size={16} /> <span>AI Note</span>
+              <Sparkles size={16} /> <span>Write with AI</span>
             </button>
             <button className="button button--primary topbar-add" type="button" onClick={onAdd} disabled={creating}>
               <Plus size={18} />{creating ? "Creating…" : "New note"}

@@ -177,6 +177,8 @@ export default function App() {
       </AppShell>
       <DomainIntelligenceDialog domain="notes" userId={user.uid} revision={manager.notes} open={intelligenceOpen} title="Notes intelligence" description="Review unfinished checklists, stale notes and organization gaps without exposing note text in the summary." date={indiaDateKey()} load={noteApi.analyze} refresh={noteApi.refreshAnalysis} onClose={() => setIntelligenceOpen(false)} />
       <AiNoteCaptureModal
+        onManual={() => { setAiCaptureOpen(false); void createNote(); }}
+        key={user.uid}
         open={aiCaptureOpen}
         onClose={() => setAiCaptureOpen(false)}
         onSuccess={(msg) => {
